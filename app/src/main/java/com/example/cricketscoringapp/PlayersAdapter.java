@@ -28,9 +28,23 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.PlayerVi
     @Override
     public void onBindViewHolder(@NonNull PlayerViewHolder holder, int position) {
         PlayerModel player = players.get(position);
+
+        // Set existing data to the views
         holder.playerNumber.setText((position + 1) + ". Name:");
         holder.playerName.setText(player.getName());
         holder.playerIsBaller.setChecked(player.isBaller());
+
+        // Listen for changes in the EditText
+        holder.playerName.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) { // Save data only when the EditText loses focus
+                player.setName(holder.playerName.getText().toString());
+            }
+        });
+
+        // Listen for changes in the CheckBox
+        holder.playerIsBaller.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            player.setBaller(isChecked);
+        });
     }
 
     @Override
@@ -51,3 +65,4 @@ public class PlayersAdapter extends RecyclerView.Adapter<PlayersAdapter.PlayerVi
         }
     }
 }
+

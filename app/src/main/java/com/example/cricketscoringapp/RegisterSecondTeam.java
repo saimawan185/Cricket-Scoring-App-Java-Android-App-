@@ -17,16 +17,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegisterFirstTeam extends AppCompatActivity {
+public class RegisterSecondTeam extends AppCompatActivity {
+
     private ArrayList<PlayerModel> players;
-    private Button firstTeamDoneBtn;
+    private Button secondTeamDoneButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.first_team);
+        setContentView(R.layout.second_team);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.secondTeamToolbar);
         setSupportActionBar(toolbar);
 
         // Enable the back button
@@ -37,11 +38,11 @@ public class RegisterFirstTeam extends AppCompatActivity {
         DrawableCompat.setTint(backIcon, getResources().getColor(android.R.color.white));  // Set the color to white
         toolbar.setNavigationIcon(backIcon);
 
-        RecyclerView playersRecyclerView = findViewById(R.id.playersRecyclerView);
-        firstTeamDoneBtn = findViewById(R.id.firstTeamDoneBtn);
+        RecyclerView playersRecyclerView = findViewById(R.id.secondTeamPlayersRecyclerView);
+        secondTeamDoneButton = findViewById(R.id.secondTeamDoneBtn);
 
-        if (getIntent().hasExtra("firstTeamPlayers")) {
-            players = getIntent().getParcelableArrayListExtra("firstTeamPlayers");
+        if (getIntent().hasExtra("secondTeamPlayers")) {
+            players = getIntent().getParcelableArrayListExtra("secondTeamPlayers");
         } else {
             players = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -54,14 +55,13 @@ public class RegisterFirstTeam extends AppCompatActivity {
         playersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         playersRecyclerView.setAdapter(adapter);
 
-        firstTeamDoneBtn.setOnClickListener(new View.OnClickListener() {
+        secondTeamDoneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
-                resultIntent.putParcelableArrayListExtra("firstTeamPlayers", players);
+                resultIntent.putParcelableArrayListExtra("secondTeamPlayers", players);
                 setResult(RESULT_OK, resultIntent);
                 finish();
-
             }
         });
     }

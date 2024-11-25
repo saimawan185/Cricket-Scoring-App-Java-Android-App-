@@ -7,16 +7,22 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +35,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_PERMISSION = 1;
     String[] mPermission = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+    private ActivityResultLauncher<Intent> registerFirstTeamLauncher;
+   private ArrayList<PlayerModel> firstTeamPlayers, secondTeamPlayers;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,17 +55,64 @@ public class MainActivity extends AppCompatActivity {
         nextBtn =(Button) findViewById(R.id.nextBtn);
         numberOfOvers =(EditText) findViewById(R.id.numberOfOvers);
 
+        registerFirstTeamLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            if (data.hasExtra("firstTeamPlayers")) {
+                                firstTeamPlayers = data.getParcelableArrayListExtra("firstTeamPlayers");
+                                for (PlayerModel player : firstTeamPlayers) {
+                                    Log.d("MainActivity", "Player: " + player.getName() + ", Baller: " + player.isBaller());
+                                }
+                            } else if (data.hasExtra("secondTeamPlayers")) {
+                                secondTeamPlayers = data.getParcelableArrayListExtra("secondTeamPlayers");
+                                for (PlayerModel player : secondTeamPlayers) {
+                                    Log.d("MainActivity", "Player: " + player.getName() + ", Baller: " + player.isBaller());
+                                }
+                            }
+
+                        }
+                    }
+                }
+        );
+
         firstTeam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, RegisterFirstTeam.class);
-                startActivity(intent);
+                if (firstTeamPlayers != null) {
+                    intent.putParcelableArrayListExtra("firstTeamPlayers", firstTeamPlayers);
+                }
+                registerFirstTeamLauncher.launch(intent);
+            }
+        });
+
+        secondTeam.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, RegisterSecondTeam.class);
+                if (secondTeamPlayers != null) {
+                    intent.putParcelableArrayListExtra("secondTeamPlayers", secondTeamPlayers);
+                }
+                registerFirstTeamLauncher.launch(intent);
             }
         });
 
         nextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (firstTeamPlayers == null || firstTeamPlayers.isEmpty()) {
+                    showDialogBox("Error", "First team players cannot be empty!");
+                    return;
+                }
+
+                if (secondTeamPlayers == null || secondTeamPlayers.isEmpty()) {
+                    showDialogBox("Error", "Second team players cannot be empty!");
+                    return;
+                }
+
                 String input = numberOfOvers.getText().toString().trim();
 
                 if(TextUtils.isEmpty(input))
@@ -66,10 +123,12 @@ public class MainActivity extends AppCompatActivity {
                 {
                     int overs = Integer.parseInt(input);
 
-                    if (overs < 1 || overs > 20) {
-                        showDialogBox("Error", "Number of overs must be between 1 and 20.");
+                    if (overs < 1 || overs > 5) {
+                        showDialogBox("Error", "Number of overs must be between 1 and 5.");
                     } else {
-                        showDialogBox("Success", "Number of overs is valid!");
+                        Random random = new Random();
+                        int randomNumber = random.nextInt(2) + 1;
+                        showDialogBox("Success", "Two "+randomNumber+" won the toss!");
                     }
                 }
             }
@@ -134,8 +193,13 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(title); // Set the dialog title
         builder.setMessage(description); // Set the dialog message
 
-        // Add the OK button
-        builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            if (title.equals("Success")) {
+                Intent intent = new Intent(MainActivity.this, MatchScreen.class);
+                startActivity(intent);
+            }
+            dialog.dismiss();
+        });
 
         // Create and show the dialog
         AlertDialog dialog = builder.create();
