@@ -19,7 +19,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:title="Cricket Scoring App"
-        app:titleTextColor="@android:color/white" />
+        app:titleTextColor="@android:color/white" >
+
+        <ImageView
+            android:id="@+id/muteUnmuteIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/unmute"
+            android:contentDescription="Mute/Unmute Icon"
+          />
+    </androidx.appcompat.widget.Toolbar>
 
     <!-- Content -->
     <LinearLayout
@@ -32,39 +43,6 @@
         app:layout_constraintBottom_toTopOf="@id/nextBtn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
-            <TextView
-                android:id="@+id/latitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="22dp"/>
-
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="10dp" />
-
-            <TextView
-                android:id="@+id/longitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="22dp"/>
-
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="10dp" />
-
-        <TextView
-            android:id="@+id/altitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="22dp"/>
-
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="20dp" />
 
         <Button
             android:id="@+id/firstTeamBtn"
@@ -113,7 +91,8 @@
             android:layout_height="wrap_content"
             android:hint="Number of Overs"
             android:inputType="number"
-            android:maxLength="2"
+            android:maxLength="1"
+            android:maxLines="1"
             android:ems="5"
             android:textSize="16sp"
             android:padding="8dp"

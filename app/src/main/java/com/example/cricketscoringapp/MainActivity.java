@@ -1,10 +1,7 @@
 package com.example.cricketscoringapp;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -14,13 +11,10 @@ import android.widget.*;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -28,14 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private  Button firstTeam, secondTeam, nextBtn;
     private  EditText numberOfOvers;
-
-    private  TextView latitude, longitude, altitude;
-
-    private TrackGPS gps;
-
-    private static final int REQUEST_CODE_PERMISSION = 1;
-    String[] mPermission = {Manifest.permission.ACCESS_FINE_LOCATION};
-
+    private ImageView muteUnmuteIcon;
     private ActivityResultLauncher<Intent> registerFirstTeamLauncher;
    private ArrayList<PlayerModel> firstTeamPlayers, secondTeamPlayers;
 
@@ -46,14 +33,26 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        latitude = findViewById(R.id.latitude);
-        longitude = findViewById(R.id.longitude);
-        altitude = findViewById(R.id.altitude);
-
         firstTeam = (Button) findViewById(R.id.firstTeamBtn);
         secondTeam =(Button) findViewById(R.id.secondTeamBtn);
         nextBtn =(Button) findViewById(R.id.nextBtn);
         numberOfOvers =(EditText) findViewById(R.id.numberOfOvers);
+        muteUnmuteIcon = (ImageView) findViewById(R.id.muteUnmuteIcon);
+
+        MusicManager.startMusic(this);
+
+        muteUnmuteIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (MusicManager.isMusicPlaying()) {
+                    MusicManager.pauseMusic();
+                    muteUnmuteIcon.setImageResource(R.drawable.mute);
+                } else {
+                    MusicManager.startMusic(MainActivity.this);
+                    muteUnmuteIcon.setImageResource(R.drawable.unmute);
+                }
+            }
+        });
 
         registerFirstTeamLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -134,20 +133,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if(Build.VERSION.SDK_INT>= 23) {
-
-            if (checkSelfPermission(mPermission[0]) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MainActivity.this, mPermission, REQUEST_CODE_PERMISSION);
-                return;
-            }
-            else {
-                initializeGps();
-            }
-        }
-        else {
-            initializeGps();
-        }
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -156,39 +141,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
-        gps.stopGPS();
-    }
-
-    private void initializeGps()
-    {
-        gps=new TrackGPS(MainActivity.this);
-        if (gps.canGetLocation()){
-            latitude.setText("Latitude: "+gps.getLatitude());
-            longitude.setText("Longitude: "+gps.getLongitude());
-            altitude.setText("Altitude: "+gps.getAltitude());
-        }
-        else{
-            gps.showAlert();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_CODE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initializeGps();
-            } else {
-                Toast.makeText(this, "Permission denied, cannot get location", Toast.LENGTH_SHORT).show();
-            }
-        }
+        MusicManager.pauseMusic();
     }
 
     private void showDialogBox(String title, String description) {
-        // Create an AlertDialog builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title); // Set the dialog title
         builder.setMessage(description); // Set the dialog message
@@ -196,12 +154,14 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", (dialog, which) -> {
             if (title.equals("Success")) {
                 Intent intent = new Intent(MainActivity.this, MatchScreen.class);
+                intent.putParcelableArrayListExtra("firstTeamPlayers", firstTeamPlayers);
+                intent.putParcelableArrayListExtra("secondTeamPlayers", secondTeamPlayers);
                 startActivity(intent);
+
             }
             dialog.dismiss();
         });
 
-        // Create and show the dialog
         AlertDialog dialog = builder.create();
         dialog.show();
     }
