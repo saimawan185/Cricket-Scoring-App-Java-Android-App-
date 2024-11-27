@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView muteUnmuteIcon;
     private ActivityResultLauncher<Intent> registerFirstTeamLauncher;
    private ArrayList<PlayerModel> firstTeamPlayers, secondTeamPlayers;
-
+   private int teamWon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,8 +126,8 @@ public class MainActivity extends AppCompatActivity {
                         showDialogBox("Error", "Number of overs must be between 1 and 5.");
                     } else {
                         Random random = new Random();
-                        int randomNumber = random.nextInt(2) + 1;
-                        showDialogBox("Success", "Two "+randomNumber+" won the toss!");
+                         teamWon = random.nextInt(2) + 1;
+                        showDialogBox("Success", "Two "+teamWon+" won the toss!");
                     }
                 }
             }
@@ -156,8 +156,9 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, MatchScreen.class);
                 intent.putParcelableArrayListExtra("firstTeamPlayers", firstTeamPlayers);
                 intent.putParcelableArrayListExtra("secondTeamPlayers", secondTeamPlayers);
+                intent.putExtra("teamWon", teamWon);
+                intent.putExtra("numberOfOvers", numberOfOvers.getText().toString().trim());
                 startActivity(intent);
-
             }
             dialog.dismiss();
         });
